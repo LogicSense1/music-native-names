@@ -1,0 +1,43 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify tag and release notes
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version="$(./scripts/version.sh)"
+          test "$RELEASE_TAG" = "v$version"
+          test -s "docs/releases/v$version.md"
+      - name: Install pinned Rust toolchain
+        run: rustup show
+      - name: Test, build and package
+        run: ./scripts/package.sh
+      - name: Create GitHub release draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version="$(./scripts/version.sh)"
+          gh release create "$RELEASE_TAG" \
+            "dist/MusicNativeNames-$version-macos-arm64.zip" \
+            "dist/SHA256SUMS" \
+            --verify-tag --draft \
+            --title "Music Native Names $version" \
+            --notes-file "docs/releases/v$version.md"

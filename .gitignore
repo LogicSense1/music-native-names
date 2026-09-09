@@ -1,0 +1,11 @@
+/target/
+/dist/
+*.app/
+.DS_Store
+*.dSYM/
+.env
+.env.*
+!.env.example
+*.log
+*.jsonl
+*.tmp
