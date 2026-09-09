@@ -14,7 +14,7 @@ ui-test = []
 
 [dependencies]
 anyhow = "1"
-base64 = "0.22"
+base64 = "0.23"
 chrono = "0.4"
 futures = "0.3"
 libc = "0.2"
